@@ -32,8 +32,11 @@ class CreateTransactionService {
 
     if (type === 'outcome') {
       const transactions = await listTransactionsService.execute();
-      if (transactions.balance.total - value < 0) {
-        throw new AppError('Invalid outcome.', 400);
+      if (transactions.balance.total < value) {
+        throw new AppError(
+          `Invalid outcome. ${transactions.balance.total} < ${value}`,
+          400,
+        );
       }
     }
 
@@ -46,7 +49,7 @@ class CreateTransactionService {
       type,
       category: categorySaved,
     });
-    transactionsRepository.save(transaction);
+    await transactionsRepository.save(transaction);
 
     return transaction;
   }
