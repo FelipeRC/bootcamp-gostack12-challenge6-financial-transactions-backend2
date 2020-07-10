@@ -37,14 +37,14 @@ class CreateTransactionService {
       }
     }
 
-    const category_id = await this.getCategoryID(category);
+    const categorySaved = await this.getCategory(category);
 
     const transactionsRepository = getRepository(Transaction);
     const transaction = transactionsRepository.create({
       title,
       value,
       type,
-      category_id,
+      category: categorySaved,
     });
     transactionsRepository.save(transaction);
 
@@ -56,24 +56,24 @@ class CreateTransactionService {
    *
    * @param category
    */
-  async getCategoryID(category: string): Promise<string> {
+  async getCategory(category: string): Promise<Category> {
     const categoriesRepository = getRepository(Category);
 
     const categoryFound = await categoriesRepository.findOne({
       where: { title: category },
     });
 
-    let category_id = '';
+    let categorySaved: Category;
     if (categoryFound) {
-      category_id = categoryFound.id;
+      categorySaved = categoryFound;
     } else {
       const newCategory = categoriesRepository.create({
         title: category,
       });
       await categoriesRepository.save(newCategory);
-      category_id = newCategory.id;
+      categorySaved = newCategory;
     }
-    return category_id;
+    return categorySaved;
   }
 }
 
